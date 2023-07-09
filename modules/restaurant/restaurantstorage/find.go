@@ -7,10 +7,10 @@ import (
 
 func (s *SqlStore) FindByConditions(ctx context.Context,
 	conditions map[string]interface{},
-	moreKeys ...string) ([]restaurantmodel.Restaurant, error) {
+	moreKeys ...string) (*restaurantmodel.Restaurant, error) {
 	db := s.db
 
-	var result []restaurantmodel.Restaurant
+	var result *restaurantmodel.Restaurant
 
 	db = db.Table(restaurantmodel.Restaurant{}.TableName()).Where(conditions)
 

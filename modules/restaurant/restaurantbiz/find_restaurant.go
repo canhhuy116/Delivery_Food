@@ -2,13 +2,14 @@ package restaurantbiz
 
 import (
 	"Delivery_Food/modules/restaurant/restaurantmodel"
+	"errors"
 	"golang.org/x/net/context"
 )
 
 type FindRestaurantStore interface {
 	FindByConditions(ctx context.Context,
 		conditions map[string]interface{},
-		moreKeys ...string) ([]restaurantmodel.Restaurant, error)
+		moreKeys ...string) (*restaurantmodel.Restaurant, error)
 }
 
 type FindRestaurantBiz struct {
@@ -22,8 +23,16 @@ func NewFindRestaurantBiz(store FindRestaurantStore) *FindRestaurantBiz {
 func (biz *FindRestaurantBiz) FindRestaurant(
 	ctx context.Context,
 	conditions map[string]interface{},
-) ([]restaurantmodel.Restaurant, error) {
+) (*restaurantmodel.Restaurant, error) {
 	result, err := biz.store.FindByConditions(ctx, conditions)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if result.Status == 0 {
+		return nil, errors.New("data deleted")
+	}
 
 	return result, err
 }

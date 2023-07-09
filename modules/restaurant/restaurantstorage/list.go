@@ -15,7 +15,8 @@ func (s *SqlStore) ListDataByConditions(ctx context.Context,
 
 	var result []restaurantmodel.Restaurant
 
-	db = db.Table(restaurantmodel.Restaurant{}.TableName()).Where(conditions)
+	db = db.Table(restaurantmodel.Restaurant{}.TableName()).Where(
+		conditions).Where("status in (1)")
 
 	for i := range moreKeys {
 		db = db.Preload(moreKeys[i])
