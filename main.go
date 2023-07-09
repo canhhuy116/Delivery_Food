@@ -1,6 +1,8 @@
 package main
 
 import (
+	"Delivery_Food/component"
+	"Delivery_Food/modules/restaurant/restauranttransport/ginrestaurant"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -26,9 +28,17 @@ func main() {
 func runService(db *gorm.DB) error {
 	r := gin.Default()
 
+	appCtx := component.NewAppContext(db)
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
+
+	restaurant := r.Group("/restaurants")
+	{
+		restaurant.POST("", ginrestaurant.CreateRestaurant(appCtx))
+		restaurant.GET("/list", ginrestaurant.ListRestaurant(appCtx))
+	}
 
 	return r.Run()
 }
