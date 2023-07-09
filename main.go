@@ -38,6 +38,7 @@ func runService(db *gorm.DB) error {
 	{
 		restaurant.POST("", ginrestaurant.CreateRestaurant(appCtx))
 		restaurant.GET("/list", ginrestaurant.ListRestaurant(appCtx))
+		restaurant.GET("/:id", ginrestaurant.FindRestaurant(appCtx))
 	}
 
 	return r.Run()
