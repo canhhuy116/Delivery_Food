@@ -1,8 +1,8 @@
 package restaurantbiz
 
 import (
+	"Delivery_Food/common"
 	"Delivery_Food/modules/restaurant/restaurantmodel"
-	"errors"
 	"golang.org/x/net/context"
 )
 
@@ -33,15 +33,18 @@ func (biz *UpdateRestaurantBiz) UpdateRestaurant(
 		map[string]interface{}{"id": id})
 
 	if err != nil {
-		return err
+		if err != common.RecordNotFound {
+			return common.ErrCannotGetEntity(restaurantmodel.EntityName, err)
+		}
+		return common.ErrInternal(err)
 	}
 
 	if oldData.Status == 0 {
-		return errors.New("data deleted")
+		return common.ErrEntityDeleted(restaurantmodel.EntityName, err)
 	}
 
 	if err := biz.store.UpdateData(ctx, id, data); err != nil {
-		return err
+		return common.ErrCannotUpdateEntity(restaurantmodel.EntityName, err)
 	}
 
 	return nil

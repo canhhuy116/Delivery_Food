@@ -1,6 +1,7 @@
 package restaurantstorage
 
 import (
+	"Delivery_Food/common"
 	"Delivery_Food/modules/restaurant/restaurantmodel"
 	"golang.org/x/net/context"
 )
@@ -11,7 +12,7 @@ func (s *SqlStore) UpdateData(ctx context.Context,
 	db := s.db
 
 	if err := db.Where("id= ?", id).Updates(data).Error; err != nil {
-		return err
+		return common.ErrDB(err)
 	}
 
 	return nil

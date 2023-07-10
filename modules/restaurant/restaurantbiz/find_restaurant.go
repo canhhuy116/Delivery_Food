@@ -1,8 +1,8 @@
 package restaurantbiz
 
 import (
+	"Delivery_Food/common"
 	"Delivery_Food/modules/restaurant/restaurantmodel"
-	"errors"
 	"golang.org/x/net/context"
 )
 
@@ -27,11 +27,15 @@ func (biz *FindRestaurantBiz) FindRestaurant(
 	result, err := biz.store.FindByConditions(ctx, conditions)
 
 	if err != nil {
-		return nil, err
+		if err != common.RecordNotFound {
+			return nil, common.ErrCannotGetEntity(restaurantmodel.EntityName,
+				err)
+		}
+		return nil, common.ErrCannotGetEntity(restaurantmodel.EntityName, err)
 	}
 
 	if result.Status == 0 {
-		return nil, errors.New("data deleted")
+		return nil, common.ErrEntityDeleted(restaurantmodel.EntityName, nil)
 	}
 
 	return result, err

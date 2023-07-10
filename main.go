@@ -2,6 +2,7 @@ package main
 
 import (
 	"Delivery_Food/component"
+	"Delivery_Food/middleware"
 	"Delivery_Food/modules/restaurant/restauranttransport/ginrestaurant"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -26,9 +27,10 @@ func main() {
 }
 
 func runService(db *gorm.DB) error {
-	r := gin.Default()
-
 	appCtx := component.NewAppContext(db)
+
+	r := gin.Default()
+	r.Use(middleware.Recover(appCtx))
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})

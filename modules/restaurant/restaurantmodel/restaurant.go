@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+const EntityName = "Restaurant"
+
 type Restaurant struct {
 	common.SQLModel `json:",inline"`
 	Id              int    `json:"id" gorm:"column:id"`

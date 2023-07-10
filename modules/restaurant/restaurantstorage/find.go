@@ -1,8 +1,10 @@
 package restaurantstorage
 
 import (
+	"Delivery_Food/common"
 	"Delivery_Food/modules/restaurant/restaurantmodel"
 	"golang.org/x/net/context"
+	"gorm.io/gorm"
 )
 
 func (s *SqlStore) FindByConditions(ctx context.Context,
@@ -10,7 +12,7 @@ func (s *SqlStore) FindByConditions(ctx context.Context,
 	moreKeys ...string) (*restaurantmodel.Restaurant, error) {
 	db := s.db
 
-	var result *restaurantmodel.Restaurant
+	var result restaurantmodel.Restaurant
 
 	db = db.Table(restaurantmodel.Restaurant{}.TableName()).Where(conditions)
 
@@ -18,9 +20,14 @@ func (s *SqlStore) FindByConditions(ctx context.Context,
 		db = db.Preload(moreKeys[i])
 	}
 
-	if err := db.First(&result).Error; err != nil {
-		return nil, err
+	err := db.First(&result).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, common.RecordNotFound
+		}
+		return nil, common.ErrDB(err)
 	}
 
-	return result, nil
+	return &result, nil
 }

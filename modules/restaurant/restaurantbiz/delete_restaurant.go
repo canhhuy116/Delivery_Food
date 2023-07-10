@@ -1,8 +1,8 @@
 package restaurantbiz
 
 import (
+	"Delivery_Food/common"
 	"Delivery_Food/modules/restaurant/restaurantmodel"
-	"errors"
 	"golang.org/x/net/context"
 )
 
@@ -27,15 +27,18 @@ func (biz *DeleteRestaurantBiz) DeleteRestaurant(ctx context.Context, id int) er
 		map[string]interface{}{"id": id})
 
 	if err != nil {
-		return err
+		if err != common.RecordNotFound {
+			return common.ErrCannotGetEntity(restaurantmodel.EntityName, err)
+		}
+		return common.ErrInternal(err)
 	}
 
 	if oldData.Status == 0 {
-		return errors.New("data deleted")
+		return common.ErrEntityDeleted(restaurantmodel.EntityName, nil)
 	}
 
 	if err := biz.store.SoftDeleteData(ctx, id); err != nil {
-		return err
+		return common.ErrCannotDeleteEntity(restaurantmodel.EntityName, err)
 	}
 
 	return nil
