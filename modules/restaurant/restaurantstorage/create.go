@@ -3,7 +3,7 @@ package restaurantstorage
 import (
 	"Delivery_Food/common"
 	"Delivery_Food/modules/restaurant/restaurantmodel"
-	"golang.org/x/net/context"
+	"context"
 )
 
 func (s *SqlStore) Create(ctx context.Context,
