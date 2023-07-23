@@ -25,6 +25,8 @@ func CreateRestaurant(appCtx component.AppContext) gin.HandlerFunc {
 			panic(common.ErrCannotCreateEntity(restaurantmodel.EntityName, err))
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data))
+		data.GenUID(common.DbTypeRestaurant)
+
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data.FakeID.String()))
 	}
 }

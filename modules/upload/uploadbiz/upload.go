@@ -29,13 +29,13 @@ func NewUploadBiz(provider uploadprovider.UploadProvider, store CreateImageStora
 
 func (biz *UploadBiz) Upload(ctx context.Context, folder string,
 	fileName string, data []byte) (*common.Image, error) {
-	//fileBytes := bytes.NewBuffer(data)
+	fileBytes := bytes.NewBuffer(data)
 
-	//w, h, err := getImageDimension(fileBytes)
+	w, h, err := getImageDimension(fileBytes)
 
-	//if err != nil {
-	//	return nil, uploadmodel.ErrFileIsNotImage(err)
-	//}
+	if err != nil {
+		return nil, uploadmodel.ErrFileIsNotImage(err)
+	}
 
 	if strings.TrimSpace(folder) == "" {
 		folder = "img"
@@ -50,9 +50,8 @@ func (biz *UploadBiz) Upload(ctx context.Context, folder string,
 		return nil, uploadmodel.ErrCannotSaveFile(err)
 	}
 
-	//img.Width = w
-	//img.Height = h
-	//img.CloudName = "s3"
+	img.Width = w
+	img.Height = h
 	img.Extension = fileExt
 
 	return img, nil

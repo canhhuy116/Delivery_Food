@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/Azure/azure-storage-blob-go v0.15.0
 	github.com/aws/aws-sdk-go v1.44.300
+	github.com/btcsuite/btcutil v1.0.2
 	github.com/gin-gonic/gin v1.9.1
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.2
