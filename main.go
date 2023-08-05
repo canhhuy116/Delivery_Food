@@ -6,6 +6,7 @@ import (
 	"Delivery_Food/middleware"
 	"Delivery_Food/modules/restaurant/restauranttransport/ginrestaurant"
 	"Delivery_Food/modules/upload/uploadtransport/ginupload"
+	"Delivery_Food/modules/user/usertransport/ginuser"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -31,6 +32,7 @@ func main() {
 	accountKey := os.Getenv("AzureAccountKey")
 	containerName := os.Getenv("AzureContainerName")
 	domain := os.Getenv("AzureDomain")
+	secretKey := os.Getenv("SECRET_KEY")
 
 	azureProvider, err := uploadprovider.NewAzureBlobProvider(accountName, accountKey, containerName, domain)
 	if err != nil {
@@ -46,14 +48,15 @@ func main() {
 	//if err := runService(db, s3Provider); err != nil {
 	//	log.Fatalln(err)
 	//}
-	if err := runService(db, azureProvider); err != nil {
+	if err := runService(db, azureProvider, secretKey); err != nil {
 		log.Fatalln(err)
 	}
 
 }
 
-func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider) error {
-	appCtx := component.NewAppContext(db, upProvider)
+func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider,
+	secretKey string) error {
+	appCtx := component.NewAppContext(db, upProvider, secretKey)
 
 	r := gin.Default()
 	r.Use(middleware.Recover(appCtx))
@@ -62,9 +65,16 @@ func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider) error {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
 
-	r.POST("/upload", ginupload.Upload(appCtx))
+	v1 := r.Group("/v1")
 
-	restaurant := r.Group("/restaurants")
+	v1.POST("/upload", ginupload.Upload(appCtx))
+
+	v1.POST("/register", ginuser.Register(appCtx))
+	v1.POST("/login", ginuser.Login(appCtx))
+	v1.GET("/profile", middleware.RequireAuth(appCtx),
+		ginuser.GetProfile(appCtx))
+
+	restaurant := v1.Group("/restaurants", middleware.RequireAuth(appCtx))
 	{
 		restaurant.POST("", ginrestaurant.CreateRestaurant(appCtx))
 		restaurant.GET("/list", ginrestaurant.ListRestaurant(appCtx))

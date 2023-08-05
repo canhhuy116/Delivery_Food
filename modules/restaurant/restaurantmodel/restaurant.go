@@ -24,6 +24,7 @@ func (Restaurant) TableName() string {
 type RestaurantCreate struct {
 	common.SQLModel `json:",inline"`
 	Name            string         `json:"name" gorm:"column:name"`
+	OwnerId         int            `json:"-" gorm:"column:owner_id"`
 	Addr            string         `json:"address" gorm:"addr"`
 	Logo            *common.Image  `json:"logo" gorm:"column:logo"`
 	Cover           *common.Images `json:"cover" gorm:"column:cover"`
