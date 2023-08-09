@@ -58,7 +58,7 @@ func RequireAuth(appCtx component.AppContext) func(c *gin.Context) {
 			panic(common.ErrNoPermission(errors.New("user has been deleted or banned")))
 		}
 
-		user.Mark(false)
+		user.Mask(false)
 
 		c.Set(common.CurrentUser, user)
 		c.Next()

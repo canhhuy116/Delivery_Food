@@ -19,7 +19,7 @@ func CreateRestaurant(appCtx component.AppContext) gin.HandlerFunc {
 		}
 
 		requester := c.MustGet(common.CurrentUser).(common.Requester)
-		data.OwnerId = requester.GetUserId()
+		data.UserId = requester.GetUserId()
 
 		store := restaurantstorage.NewSQLStore(appCtx.GetMainDbConnection())
 		biz := restaurantbiz.NewCreateRestaurantBiz(store)

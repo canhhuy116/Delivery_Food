@@ -35,7 +35,7 @@ func (User) TableName() string {
 	return "users"
 }
 
-func (data *User) Mark(isAdminOrOwner bool) {
+func (data *User) Mask(isAdminOrOwner bool) {
 	data.GenUID(common.DbUser)
 }
 

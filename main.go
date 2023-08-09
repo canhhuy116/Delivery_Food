@@ -1,10 +1,12 @@
 package main
 
 import (
+	"Delivery_Food/common"
 	"Delivery_Food/component"
 	"Delivery_Food/component/uploadprovider"
 	"Delivery_Food/middleware"
 	"Delivery_Food/modules/restaurant/restauranttransport/ginrestaurant"
+	"Delivery_Food/modules/restaurantlike/restaurantliketransport/ginrestaurantlike"
 	"Delivery_Food/modules/upload/uploadtransport/ginupload"
 	"Delivery_Food/modules/user/usertransport/ginuser"
 	"github.com/gin-gonic/gin"
@@ -45,6 +47,8 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	db = db.Debug()
+
 	//if err := runService(db, s3Provider); err != nil {
 	//	log.Fatalln(err)
 	//}
@@ -81,7 +85,24 @@ func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider,
 		restaurant.GET("/:id", ginrestaurant.FindRestaurant(appCtx))
 		restaurant.PATCH("/:id", ginrestaurant.UpdateRestaurant(appCtx))
 		restaurant.DELETE("/:id", ginrestaurant.DeleteRestaurant(appCtx))
+
+		restaurant.GET("/:id/liked-users", ginrestaurantlike.ListUser(appCtx))
 	}
+
+	v1.GET("/encode-uid", func(c *gin.Context) {
+		type reqData struct {
+			DbType int `form:"type"`
+			RealId int `form:"id"`
+		}
+
+		var req reqData
+		c.ShouldBind(&req)
+
+		c.JSON(http.StatusOK, gin.H{
+			// note
+			"uid": common.NewUID(uint32(req.RealId), req.DbType, 1).String(),
+		})
+	})
 
 	return r.Run()
 }
