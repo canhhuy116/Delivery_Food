@@ -1,6 +1,7 @@
 package restaurantlikebiz
 
 import (
+	"Delivery_Food/component/asyncjob"
 	"Delivery_Food/modules/restaurantlike/restaurantlikemodel"
 	"context"
 )
@@ -13,12 +14,17 @@ type UserLikeRestaurantStore interface {
 		data *restaurantlikemodel.Like) error
 }
 
-type userLikeRestaurantBiz struct {
-	store UserLikeRestaurantStore
+type IncreaseLikeCountRestaurantStore interface {
+	IncreaseLikeCount(ctx context.Context, id int) error
 }
 
-func NewUserLikeRestaurantBiz(store UserLikeRestaurantStore) *userLikeRestaurantBiz {
-	return &userLikeRestaurantBiz{store: store}
+type userLikeRestaurantBiz struct {
+	store    UserLikeRestaurantStore
+	incStore IncreaseLikeCountRestaurantStore
+}
+
+func NewUserLikeRestaurantBiz(store UserLikeRestaurantStore, incStore IncreaseLikeCountRestaurantStore) *userLikeRestaurantBiz {
+	return &userLikeRestaurantBiz{store: store, incStore: incStore}
 }
 
 func (biz *userLikeRestaurantBiz) LikeRestaurant(
@@ -39,6 +45,19 @@ func (biz *userLikeRestaurantBiz) LikeRestaurant(
 	if err != nil {
 		return restaurantlikemodel.ErrCannotLikeRestaurant(err)
 	}
+
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				return
+			}
+		}()
+		job := asyncjob.NewJob(func(ctx context.Context) error {
+			return biz.incStore.IncreaseLikeCount(ctx, data.RestaurantId)
+		})
+
+		_ = asyncjob.NewGroup(true, job).Run(ctx)
+	}()
 
 	return nil
 }
