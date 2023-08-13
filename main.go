@@ -87,6 +87,8 @@ func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider,
 		restaurant.DELETE("/:id", ginrestaurant.DeleteRestaurant(appCtx))
 
 		restaurant.GET("/:id/liked-users", ginrestaurantlike.ListUser(appCtx))
+		restaurant.POST("/:id/like", ginrestaurantlike.UserLikeRestaurant(appCtx))
+		restaurant.DELETE("/:id/unlike", ginrestaurantlike.UserUnlikeRestaurant(appCtx))
 	}
 
 	v1.GET("/encode-uid", func(c *gin.Context) {
@@ -96,7 +98,10 @@ func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider,
 		}
 
 		var req reqData
-		c.ShouldBind(&req)
+		err := c.ShouldBind(&req)
+		if err != nil {
+			return
+		}
 
 		c.JSON(http.StatusOK, gin.H{
 			// note

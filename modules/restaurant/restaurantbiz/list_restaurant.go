@@ -4,7 +4,6 @@ import (
 	"Delivery_Food/common"
 	"Delivery_Food/modules/restaurant/restaurantmodel"
 	"context"
-	"log"
 )
 
 type ListRestaurantStore interface {
@@ -42,23 +41,23 @@ func (biz *ListRestaurantBiz) ListRestaurant(
 		return nil, common.ErrCannotListEntity(restaurantmodel.EntityName, err)
 	}
 
-	ids := make([]int, len(result))
-
-	for i := range result {
-		ids[i] = result[i].ID
-	}
-
-	likeMap, err := biz.likeStore.GetRestaurantLike(ctx, ids)
-
-	if err != nil {
-		log.Println("Error at GetRestaurantLike: ", err)
-	}
-
-	if v := likeMap; v != nil {
-		for i, item := range result {
-			result[i].LikeCount = likeMap[item.ID]
-		}
-	}
+	//ids := make([]int, len(result))
+	//
+	//for i := range result {
+	//	ids[i] = result[i].ID
+	//}
+	//
+	//likeMap, err := biz.likeStore.GetRestaurantLike(ctx, ids)
+	//
+	//if err != nil {
+	//	log.Println("Error at GetRestaurantLike: ", err)
+	//}
+	//
+	//if v := likeMap; v != nil {
+	//	for i, item := range result {
+	//		result[i].LikeCount = likeMap[item.ID]
+	//	}
+	//}
 
 	return result, nil
 }
