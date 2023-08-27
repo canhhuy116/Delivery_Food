@@ -33,6 +33,10 @@ func ErrCannotUnlikeRestaurant(err error) *common.AppError {
 	)
 }
 
+func (l *Like) GetRestaurantId() int {
+	return l.RestaurantId
+}
+
 var (
 	ErrUserLikedRestaurant = common.NewCustomError(nil, "the user liked this restaurant", "ErrUserLikedRestaurant")
 

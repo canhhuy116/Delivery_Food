@@ -3,7 +3,6 @@ package ginrestaurantlike
 import (
 	"Delivery_Food/common"
 	"Delivery_Food/component"
-	"Delivery_Food/modules/restaurant/restaurantstorage"
 	"Delivery_Food/modules/restaurantlike/restaurantlikebiz"
 	"Delivery_Food/modules/restaurantlike/restaurantlikestorage"
 	"github.com/gin-gonic/gin"
@@ -21,9 +20,8 @@ func UserUnlikeRestaurant(appCtx component.AppContext) gin.HandlerFunc {
 		requester := c.MustGet(common.CurrentUser).(common.Requester)
 
 		store := restaurantlikestorage.NewSQLStore(appCtx.GetMainDbConnection())
-		decStore := restaurantstorage.NewSQLStore(appCtx.
-			GetMainDbConnection())
-		biz := restaurantlikebiz.NewUserUnlikeRestaurantBiz(store, decStore)
+		//decStore := restaurantstorage.NewSQLStore(appCtx. GetMainDbConnection())
+		biz := restaurantlikebiz.NewUserUnlikeRestaurantBiz(store, appCtx.GetPubSub())
 
 		if err := biz.UnlikeRestaurant(c.Request.Context(),
 			requester.GetUserId(), int(uid.GetLocalID())); err != nil {

@@ -1,8 +1,9 @@
 package restaurantlikebiz
 
 import (
-	"Delivery_Food/component/asyncjob"
+	"Delivery_Food/common"
 	"Delivery_Food/modules/restaurantlike/restaurantlikemodel"
+	"Delivery_Food/pubsub"
 	"context"
 )
 
@@ -19,12 +20,21 @@ type IncreaseLikeCountRestaurantStore interface {
 }
 
 type userLikeRestaurantBiz struct {
-	store    UserLikeRestaurantStore
-	incStore IncreaseLikeCountRestaurantStore
+	store UserLikeRestaurantStore
+	//incStore IncreaseLikeCountRestaurantStore
+	pubsub pubsub.PubSub
 }
 
-func NewUserLikeRestaurantBiz(store UserLikeRestaurantStore, incStore IncreaseLikeCountRestaurantStore) *userLikeRestaurantBiz {
-	return &userLikeRestaurantBiz{store: store, incStore: incStore}
+func NewUserLikeRestaurantBiz(
+	store UserLikeRestaurantStore,
+	//incStore IncreaseLikeCountRestaurantStore,
+	pubsub pubsub.PubSub,
+) *userLikeRestaurantBiz {
+	return &userLikeRestaurantBiz{
+		store: store,
+		//incStore: incStore,
+		pubsub: pubsub,
+	}
 }
 
 func (biz *userLikeRestaurantBiz) LikeRestaurant(
@@ -46,18 +56,17 @@ func (biz *userLikeRestaurantBiz) LikeRestaurant(
 		return restaurantlikemodel.ErrCannotLikeRestaurant(err)
 	}
 
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				return
-			}
-		}()
-		job := asyncjob.NewJob(func(ctx context.Context) error {
-			return biz.incStore.IncreaseLikeCount(ctx, data.RestaurantId)
-		})
+	biz.pubsub.Publish(ctx, common.TopicUserLikeRestaurant,
+		pubsub.NewMessage(data))
 
-		_ = asyncjob.NewGroup(true, job).Run(ctx)
-	}()
+	//go func() {
+	//	defer common.AppRecover()
+	//	job := asyncjob.NewJob(func(ctx context.Context) error {
+	//		return biz.incStore.IncreaseLikeCount(ctx, data.RestaurantId)
+	//	})
+	//
+	//	_ = asyncjob.NewGroup(true, job).Run(ctx)
+	//}()
 
 	return nil
 }

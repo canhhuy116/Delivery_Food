@@ -1,8 +1,9 @@
 package restaurantlikebiz
 
 import (
-	"Delivery_Food/component/asyncjob"
+	"Delivery_Food/common"
 	"Delivery_Food/modules/restaurantlike/restaurantlikemodel"
+	"Delivery_Food/pubsub"
 	"context"
 )
 
@@ -19,12 +20,21 @@ type DecreaseLikeCountRestaurantStore interface {
 }
 
 type userUnlikeRestaurantBiz struct {
-	store    UserUnlikeRestaurantStore
-	decStore DecreaseLikeCountRestaurantStore
+	store UserUnlikeRestaurantStore
+	//decStore DecreaseLikeCountRestaurantStore
+	pubsub pubsub.PubSub
 }
 
-func NewUserUnlikeRestaurantBiz(store UserUnlikeRestaurantStore, decStore DecreaseLikeCountRestaurantStore) *userUnlikeRestaurantBiz {
-	return &userUnlikeRestaurantBiz{store: store, decStore: decStore}
+func NewUserUnlikeRestaurantBiz(
+	store UserUnlikeRestaurantStore,
+	//decStore DecreaseLikeCountRestaurantStore,
+	pubsub pubsub.PubSub,
+) *userUnlikeRestaurantBiz {
+	return &userUnlikeRestaurantBiz{
+		store: store,
+		//decStore: decStore,
+		pubsub: pubsub,
+	}
 }
 
 func (biz *userUnlikeRestaurantBiz) UnlikeRestaurant(
@@ -46,18 +56,7 @@ func (biz *userUnlikeRestaurantBiz) UnlikeRestaurant(
 		return restaurantlikemodel.ErrCannotUnlikeRestaurant(err)
 	}
 
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				return
-			}
-		}()
-		job := asyncjob.NewJob(func(ctx context.Context) error {
-			return biz.decStore.DecreaseLikeCount(ctx, restaurantId)
-		})
-
-		_ = asyncjob.NewGroup(true, job).Run(ctx)
-	}()
+	biz.pubsub.Publish(ctx, common.TopicUserDislikeRestaurant, pubsub.NewMessage(liked))
 
 	return nil
 }
