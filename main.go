@@ -10,6 +10,7 @@ import (
 	"Delivery_Food/modules/upload/uploadtransport/ginupload"
 	"Delivery_Food/modules/user/usertransport/ginuser"
 	"Delivery_Food/pubsub/pblocal"
+	"Delivery_Food/skio"
 	"Delivery_Food/subscriber"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -115,6 +116,11 @@ func runService(db *gorm.DB, upProvider uploadprovider.UploadProvider,
 			"uid": common.NewUID(uint32(req.RealId), req.DbType, 1).String(),
 		})
 	})
+
+	err := skio.NewRealtimeEngine().Run(appCtx, r)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	return r.Run()
 }
